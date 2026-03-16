@@ -45,6 +45,10 @@ deck_recommend:
   local_pool_size: 0
   timeout: 60s
   default_algs: ["dfs", "ga"]
+  local_library_dirs:
+    - "D:/github/Haruki-Service-API"
+    - "D:/github/Haruki-Service-API/pkg/deck_cgo/lib/windows_amd64"
+  static_data_dir: "D:/github/Haruki-Service-API/data"
   servers:
     - url: "http://127.0.0.1:45556"
       weight: 1

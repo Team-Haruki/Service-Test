@@ -17,6 +17,8 @@ func NewLocalDeckRecommender(
 	algs []string,
 	poolSize int,
 	timeout time.Duration,
+	libraryDirs []string,
+	staticDataDir string,
 ) (*LocalDeckRecommender, error) {
 	return nil, fmt.Errorf("LocalDeckRecommender requires CGO_ENABLED=1 but it was disabled during build")
 }

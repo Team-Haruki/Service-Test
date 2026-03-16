@@ -50,6 +50,8 @@ func NewLocalDeckRecommender(
 	algs []string,
 	poolSize int,
 	timeout time.Duration,
+	libraryDirs []string,
+	staticDataDir string,
 ) (*LocalDeckRecommender, error) {
 	if poolSize <= 0 {
 		poolSize = runtime.NumCPU()
@@ -61,7 +63,11 @@ func NewLocalDeckRecommender(
 		algs = []string{"dfs", "sa", "ga"}
 	}
 
-	if staticDataDir := resolveDeckStaticDataDir(); staticDataDir != "" {
+	if err := prependDeckLibraryDirs(libraryDirs); err != nil {
+		return nil, fmt.Errorf("LocalDeckRecommender: set library dirs: %w", err)
+	}
+
+	if staticDataDir := resolveDeckStaticDataDir(staticDataDir); staticDataDir != "" {
 		if err := deck_cgo.SetStaticDataDir(staticDataDir); err != nil {
 			return nil, fmt.Errorf("LocalDeckRecommender: set static data dir: %w", err)
 		}
@@ -86,7 +92,11 @@ func NewLocalDeckRecommender(
 	}, nil
 }
 
-func resolveDeckStaticDataDir() string {
+func resolveDeckStaticDataDir(configured string) string {
+	if configured = strings.TrimSpace(configured); configured != "" && dirExists(configured) {
+		return configured
+	}
+
 	if wd, err := os.Getwd(); err == nil {
 		candidate := filepath.Join(wd, "data")
 		if dirExists(candidate) {
@@ -102,6 +112,63 @@ func resolveDeckStaticDataDir() string {
 	}
 
 	return ""
+}
+
+func prependDeckLibraryDirs(configured []string) error {
+	var dirs []string
+	appendDir := func(path string) {
+		path = strings.TrimSpace(path)
+		if path == "" {
+			return
+		}
+		dirs = append(dirs, path)
+	}
+
+	for _, path := range configured {
+		appendDir(path)
+	}
+
+	if len(dirs) == 0 {
+		return nil
+	}
+
+	envKey := "LD_LIBRARY_PATH"
+	sep := ":"
+	switch runtime.GOOS {
+	case "windows":
+		envKey = "PATH"
+		sep = string(os.PathListSeparator)
+	case "darwin":
+		envKey = "DYLD_LIBRARY_PATH"
+	}
+
+	current := os.Getenv(envKey)
+	parts := make([]string, 0, len(dirs)+1)
+	seen := make(map[string]struct{})
+	for _, dir := range dirs {
+		clean := filepath.Clean(dir)
+		if _, ok := seen[clean]; ok {
+			continue
+		}
+		seen[clean] = struct{}{}
+		parts = append(parts, clean)
+	}
+	if strings.TrimSpace(current) != "" {
+		for _, part := range strings.Split(current, sep) {
+			part = strings.TrimSpace(part)
+			if part == "" {
+				continue
+			}
+			clean := filepath.Clean(part)
+			if _, ok := seen[clean]; ok {
+				continue
+			}
+			seen[clean] = struct{}{}
+			parts = append(parts, clean)
+		}
+	}
+
+	return os.Setenv(envKey, strings.Join(parts, sep))
 }
 
 func dirExists(path string) bool {

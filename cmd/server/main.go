@@ -67,13 +67,19 @@ func main() {
 
 	var deckRecommender service.DeckRecommender
 	if cfg.DeckRecommend.UseLocalEngine {
+		var musicMetaBytes []byte
+		if userData != nil {
+			musicMetaBytes = userData.MusicMetaBytes()
+		}
 		localRec, err := service.NewLocalDeckRecommender(
 			cfg.MasterData.Dir,
-			userData.MusicMetaBytes(),
+			musicMetaBytes,
 			masterdata.GetRegion(),
 			cfg.DeckRecommend.DefaultAlgs,
 			cfg.DeckRecommend.LocalPoolSize,
 			cfg.DeckRecommend.Timeout,
+			cfg.DeckRecommend.LocalLibraryDirs,
+			cfg.DeckRecommend.StaticDataDir,
 		)
 		if err != nil {
 			slog.Warn("Failed to initialize local deck recommender, falling back to backend", "error", err)
