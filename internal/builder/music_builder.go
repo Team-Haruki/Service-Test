@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -118,7 +119,7 @@ func (b *MusicBuilder) BuildMusicChartRequest(query model.MusicChartQuery, music
 	susPath := asset.ResolveAssetPath(b.assets, b.assetDir, susRelative)
 
 	if susPath == "" {
-		fmt.Printf("[WARN] Sus/Chart file missing: %s\n", susRelative)
+		slog.Warn("sus/chart file missing", "path", susRelative)
 	}
 
 	noteHost := "lunabot_static_images/chart_asset/notes"

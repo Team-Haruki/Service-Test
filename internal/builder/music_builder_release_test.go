@@ -35,7 +35,7 @@ func (s *stubMusicSource) GetLimitedTimeMusics(musicID int) []*masterdata.Limite
 }
 
 func TestBuildMusicDetailRequest_ReleaseAtInt64(t *testing.T) {
-	b := NewMusicBuilder(&stubMusicSource{}, nil, "", nil)
+	b := NewMusicBuilder(&stubMusicSource{}, nil, nil, "", nil)
 	music := &masterdata.Music{
 		ID:          1,
 		Title:       "test",

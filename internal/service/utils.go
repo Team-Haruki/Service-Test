@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -188,13 +189,13 @@ func NewUserDataService(path string, musicMetaPath string, mysekaiPath string, a
 						data = merged
 					}
 				} else {
-					fmt.Printf("[WARN] Failed to JSON decode mysekai data: %v\n", err2)
+					slog.Warn("failed to decode mysekai data", "path", mysekaiPath, "error", err2)
 				}
 			} else {
-				fmt.Printf("[WARN] Failed to JSON decode user data for mysekai merge: %v\n", err1)
+				slog.Warn("failed to decode user data for mysekai merge", "error", err1)
 			}
 		} else {
-			fmt.Printf("[WARN] Failed to load mysekai data from %s: %v\n", mysekaiPath, err)
+			slog.Warn("failed to load mysekai data", "path", mysekaiPath, "error", err)
 		}
 	}
 
@@ -238,7 +239,7 @@ func NewUserDataService(path string, musicMetaPath string, mysekaiPath string, a
 		if mBytes, err := os.ReadFile(filepath.Clean(musicMetaPath)); err == nil {
 			musicMeta = injectOmakaseMusicMeta(mBytes)
 		} else {
-			fmt.Printf("[WARN] Failed to load music meta from %s: %v\n", musicMetaPath, err)
+			slog.Warn("failed to load music meta", "path", musicMetaPath, "error", err)
 		}
 	}
 

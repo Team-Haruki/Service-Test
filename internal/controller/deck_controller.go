@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -101,7 +101,7 @@ func (c *DeckController) BuildDeckRecommendAutoRequest(query model.DeckAutoQuery
 		if err == nil {
 			return payload, nil
 		}
-		log.Printf("[DEBUG] Failed to generate deck automatically via backend/CGo, falling back to local calculation: %v\n", err)
+		slog.Warn("deck auto recommend backend failed, falling back to local calculation", "error", err)
 	}
 	return c.buildDeckRecommendAutoLocal(query)
 }

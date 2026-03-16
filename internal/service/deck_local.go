@@ -16,7 +16,7 @@ package service
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -204,7 +204,7 @@ func (l *LocalDeckRecommender) Recommend(req DeckRecommendRequest) (*DeckRecomme
 	for range req.BatchOption {
 		p := <-results
 		if p.err != nil {
-			log.Printf("[WARN] LocalDeckRecommender[%s] failed: %v\n", p.alg, p.err)
+			slog.Warn("local deck recommender failed", "algorithm", p.alg, "error", p.err)
 			continue
 		}
 		if p.alg != "" {

@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"log/slog"
 	"path/filepath"
 	"strings"
 
@@ -132,16 +133,6 @@ func (b *CardBuilder) BuildCardDetailRequestBody(
 		EventCharaIconPath: eventCharaPath,
 	}
 
-	// DEBUG: Verify Gacha and Costume info
-	fmt.Printf("[DEBUG] Builder - CardID: %d\n", card.ID)
-	if gachaInfo != nil {
-		fmt.Printf("[DEBUG] Builder - GachaInfo: ID=%d, Name=%s, Banner=%s\n", gachaInfo.GachaID, gachaInfo.GachaName, gachaInfo.GachaBannerPath)
-	} else {
-		fmt.Printf("[DEBUG] Builder - GachaInfo is NIL\n")
-	}
-	costumePaths := b.buildCostumeImagePaths(card)
-	fmt.Printf("[DEBUG] Builder - CostumePaths: %v\n", costumePaths)
-
 	return req, nil
 }
 
@@ -207,7 +198,7 @@ func (b *CardBuilder) BuildCardListRequest(cardIDs []int, region string) (*model
 		card, err := b.cards.GetCardByID(id)
 		if err != nil {
 			// 如果卡牌不存在，跳过或报错？这里选择跳过
-			fmt.Printf("[WARN] Card ID %d not found\n", id)
+			slog.Warn("card not found while building list", "card_id", id, "error", err)
 			continue
 		}
 
